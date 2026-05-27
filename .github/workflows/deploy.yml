@@ -1,0 +1,36 @@
+name: Deploy To-Do App to AWS
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Code von GitHub auschecken
+      uses: actions/checkout@v3
+
+    - name: Per SSH auf AWS einloggen und App aktualisieren
+      uses: appleboy/ssh-action@master
+      with:
+        host: 3.64.217.19
+        username: ec2-user
+        key: ${{ secrets.AWS_SSH_KEY }}
+        script: |
+          # 1. In den Projektordner auf AWS wechseln
+          cd to-do-liste || exit
+          
+          # 2. Den neuesten Code von GitHub ziehen
+          git pull origin main
+          
+          # 3. Alten Container stoppen und löschen
+          docker rm -f mein-todo-container || true
+          
+          # 4. Das Docker-Image frisch ohne Cache neu bauen
+          docker build --no-cache -t todo-devops-app .
+          
+          # 5. Den Container auf dem offenen Port 80 neu starten
+          docker run -d -p 80:8000 --name mein-todo-container todo-devops-app
