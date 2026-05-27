@@ -24,6 +24,7 @@ id_counter = 1
 def read_root(request: Request):
     return templates.TemplateResponse("index.html", {"request": request, "todos": todo_db})
 
+
 # 2. Neues To-Do über das HTML-Formular hinzufügen
 @app.post("/add")
 def add_todo(titel: str = Form(...)):
