@@ -25,7 +25,7 @@ jobs:
     - name: Befehle auf AWS ausführen
       run: |
         # Nutzt die Secrets für den eigentlichen Login-Befehl
-        ssh -i ~/.ssh/id_rsa ec2-user@${{ secrets.AWS_SERVER_IP }} << 'EOF'
+        ssh -i ~/.ssh/id_rsa ec2-user@${{ secrets.SERVER_IP }} << 'EOF'
           # 1. In den Projektordner wechseln
           cd to-do-liste || exit
           
