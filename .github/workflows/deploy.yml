@@ -23,6 +23,8 @@ jobs:
         ssh-keyscan -H "${{ secrets.SERVER_IP }}" >> ~/.ssh/known_hosts
 
     - name: Befehle auf AWS ausführen
+      env:
+        SERVER_IP: ${{ secrets.SERVER_IP }}
       run: |
         # Nutzt die Secrets für den eigentlichen Login-Befehl
         ssh -i ~/.ssh/id_rsa ec2-user@${{ secrets.SERVER_IP }} << 'EOF'
