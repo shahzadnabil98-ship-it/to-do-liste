@@ -13,18 +13,19 @@ jobs:
     - name: Code von GitHub auschecken
       uses: actions/checkout@v3
 
-    - name: SSH-Schlüssel konfigurieren
+    - name: SSH-Schlüssel und Host konfigurieren
       run: |
         mkdir -p ~/.ssh
-        # Hier wird der Base64-Text sicher wieder in den echten Schlüssel decodiert
-        echo "${{ secrets.AWS_SSH_KEY }}" | base64 --decode > ~/.ssh/id_rsa
+        # Holt den privaten Schlüssel aus den GitHub Secrets
+        echo "${{ secrets.PRIVATE_KEY }}" > ~/.ssh/id_rsa
         chmod 600 ~/.ssh/id_rsa
-        ssh-keyscan -H 3.64.217.19 >> ~/.ssh/known_hosts
-
+        # Holt die Server-IP aus den Secrets, damit die Verbindung vertrauenswürdig ist
+        ssh-keyscan -H "${{ secrets.SERVER_IP }}" >> ~/.ssh/known_hosts
 
     - name: Befehle auf AWS ausführen
       run: |
-        ssh -i ~/.ssh/id_rsa ec2-user@3.64.217.19 << 'EOF'
+        # Nutzt die Secrets für den eigentlichen Login-Befehl
+        ssh -i ~/.ssh/id_rsa ec2-user@${{ secrets.AWS_SERVER_IP }} << 'EOF'
           # 1. In den Projektordner wechseln
           cd to-do-liste || exit
           
@@ -37,6 +38,6 @@ jobs:
           # 4. Das Docker-Image frisch ohne Cache neu bauen
           docker build --no-cache -t todo-devops-app .
           
-          # 5. Den Container auf Port 80 neu starten
+          # 5. Den Container auf Port 80 neu starten (ggf. auf :3000 ändern, falls nötig)
           docker run -d -p 80:8000 --name mein-todo-container todo-devops-app
         EOF
